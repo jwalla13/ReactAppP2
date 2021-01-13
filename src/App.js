@@ -1,10 +1,23 @@
 import React, { Component } from 'react'
 import Table from './Table'
 import Form from './Form';
+import axios from 'axios';
 
 class App extends Component {
   state = {
     characters: []
+  }
+
+  componentDidMount() {
+    axios.get('http://localhost:5000/users')
+      .then(res => {
+        const characters = res.data.users_list;
+        this.setState({ characters })
+      })
+      .catch(function (error){
+        //Not handling the error, just logging it in the console
+        console.log(error);
+      });
   }
 
   removeCharacter = index => {
