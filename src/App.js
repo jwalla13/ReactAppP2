@@ -10,8 +10,10 @@ class App extends Component {
 
   handleSubmit = character => {
     this.makePostCall(character).then( callResult => {
-      if (callResult === true){
-        this.setState({ characters: [...this.state.characters, character] });
+      if (callResult){
+        if (callResult.status === 201){
+          this.setState({ characters: [...this.state.characters, callResult.data.user] });
+        }
       }
     });
   }
@@ -20,13 +22,22 @@ class App extends Component {
     return axios.post('http://localhost:5000/users', character)
       .then(function (response) {
         console.log(response);
-        return (response.status === 200);
+        return response;
       })
       .catch(function (error) {
         console.log(error);
         return false;
       })
+  }
 
+  makeDeleteCall(character){
+    return axios.delete('http://localhost:5000/users', { data: character })
+      .then(function (response) {
+        return (response.status === 200);
+      })
+      .catch(function (error){
+        return false;
+      })
   }
 
   componentDidMount() {
@@ -43,16 +54,19 @@ class App extends Component {
 
   removeCharacter = index => {
     const { characters } = this.state
-
     this.setState({
       characters: characters.filter((character, i) => {
-        return i !== index
+        if(i === index){
+          this.makeDeleteCall(character).then( callResult => {
+            if (callResult){
+              return false;
+            }
+          });
+        } else{
+        return true;
+        }
       }),
     })
-  }
-
-  handleSubmit = character => {
-    this.setState({ characters: [...this.state.characters, character] })
   }
 
   render() {
